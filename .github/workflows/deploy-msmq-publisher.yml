@@ -32,7 +32,7 @@ jobs:
                 tag_name: ${{ github.ref}}
                 release_name: ${{ github.ref}}
 
-           - uses: csexton/release-asset_action@v2
+           - uses: actions/upload-artifact
              with: 
                 github-token: ${{ secrets.GITHUB_TOKEN}}
                 pattern: MSMQ_Publisher_Process\bin\Release\net6.0-windows\win-x64\publish\*.exe
