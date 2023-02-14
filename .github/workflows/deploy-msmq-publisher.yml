@@ -35,7 +35,7 @@ jobs:
            - uses: csexton/release-asset_action@v2
              with: 
                 github-token: ${{ secrets.GITHUB_TOKEN}}
-                pattern: MSMQ_Publisher_Process\bin\Release\net6.0-windows\win-x64\publish\*exe
+                pattern: MSMQ_Publisher_Process\bin\Release\net6.0-windows\win-x64\publish\*.exe
                 release-url: ${{ steps.create_release.outputs.upload_url}}
    
 
