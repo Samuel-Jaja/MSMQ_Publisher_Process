@@ -5,6 +5,7 @@ using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace MSMQ_Publisher_Process.ViewModel
     /// The class uses MSMQ Messaging Nuget Package and BindableBase class from Prism Framework.
     /// </summary>
     public class WellDataViewModel : BindableBase
-    {
+    { 
         public WellDataViewModel()
         {
             SendWellDataCommand = new DelegateCommand(SendWellDataCommandAction);
@@ -29,15 +30,20 @@ namespace MSMQ_Publisher_Process.ViewModel
             CreateQueue();
             SendDataToQueue();
         }
+
         /// <summary>
         /// This method specifies queuePath and creates a queue if one does nor exist
         /// </summary>
-        public static void CreateQueue()
+
+        //string targetIPAddress = "192.168.1.251";
+        //int port =1801;
+        readonly string publicQueuePath = "FormatName:DIRECT=TCP:192.168.1.251:1801\\public$\\PublicMsmq";
+        //readonly string privatequeuePath = @".\private$\MSMQ_MessagingApp";
+        public void CreateQueue()
         {
-            string queuePath = @".\private$\MSMQ_MessagingApp";
-            if (!MessageQueue.Exists(queuePath))
+            if (!MessageQueue.Exists(publicQueuePath));
             {
-                MessageQueue.Create(queuePath);
+                MessageQueue.Create(publicQueuePath);
             }
         }
         /// <summary>
@@ -45,7 +51,7 @@ namespace MSMQ_Publisher_Process.ViewModel
         /// </summary>
         public void SendDataToQueue()
         {
-            MessageQueue queue = new(@".\private$\MSMQ_MessagingApp");
+            MessageQueue queue = new(publicQueuePath);
             WellDataModel wellData = MapWellDataProperties();
             queue.Send(wellData, "CypherCrescentResource");
             FieldName = string.Empty;
