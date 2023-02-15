@@ -37,7 +37,9 @@ namespace MSMQ_Publisher_Process.ViewModel
 
         //string targetIPAddress = "192.168.1.251";
         //int port =1801;
-        readonly string publicQueuePath = "FormatName:DIRECT=TCP:192.168.1.251:1801\\public$\\PublicMsmq";
+        //readonly string publicQueuePath = "FormatName:DIRECT=TCP:192.168.1.151:1801\\Public$\\publicmsmq";
+        readonly string publicQueuePath = "FormatName:DIRECT=OS:192.168.1.151\\Public$\\publicmsmq";
+        //readonly string publicQueuePath = "FormatName:PUBLIC=publicmsmq@192.168.1.251";
         //readonly string privatequeuePath = @".\private$\MSMQ_MessagingApp";
         public void CreateQueue()
         {
