@@ -37,13 +37,17 @@ namespace MSMQ_Publisher_Process.ViewModel
 
         //string targetIPAddress = "192.168.1.251";
         //int port =1801;
-        //readonly string publicQueuePath = "FormatName:DIRECT=TCP:192.168.1.151:1801\\Public$\\publicmsmq";
-        readonly string publicQueuePath = "FormatName:DIRECT=OS:192.168.1.151\\Public$\\publicmsmq";
+
+        //readonly string publicQueuePath = "FormatName:DIRECT=OS:<cclng-pc5188>\\public$\\publicmsmq";
+        //readonly string publicQueuePath = "FormatName:DIRECT=TCP:192.168.1.151\\PUBLIC$\\publicmsmq";
+        readonly string publicQueuePath = "FormatName:DIRECT=OS:CCLNG-PC5188.svr.cyphercrescent.com\\publicmsmq";
+
         //readonly string publicQueuePath = "FormatName:PUBLIC=publicmsmq@192.168.1.251";
         //readonly string privatequeuePath = @".\private$\MSMQ_MessagingApp";
+
         public void CreateQueue()
         {
-            if (!MessageQueue.Exists(publicQueuePath));
+            if (!MessageQueue.Exists(publicQueuePath))
             {
                 MessageQueue.Create(publicQueuePath);
             }
