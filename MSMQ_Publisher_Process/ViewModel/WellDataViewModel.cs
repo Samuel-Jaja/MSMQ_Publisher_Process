@@ -35,16 +35,16 @@ namespace MSMQ_Publisher_Process.ViewModel
         /// This method specifies queuePath and creates a queue if one does nor exist
         /// </summary>
 
-        //string targetIPAddress = "192.168.1.251";
+
         //int port =1801;
+        //string multicastAddress = "234.1.1.1:8001";
 
-        //readonly string publicQueuePath = "FormatName:DIRECT=OS:<cclng-pc5188>\\public$\\publicmsmq";
-        //readonly string publicQueuePath = "FormatName:DIRECT=TCP:192.168.1.151\\PUBLIC$\\publicmsmq";
-        readonly string publicQueuePath = "FormatName:DIRECT=OS:CCLNG-PC5188.svr.cyphercrescent.com\\publicmsmq";
-
-        //readonly string publicQueuePath = "FormatName:PUBLIC=publicmsmq@192.168.1.251";
+        //readonly string publicQueuePath =@"FormatName:DIRECT=TCP:CCLNG-PC511\publicmsmq";
+        //string publicQueuePath = @"FormatName:DIRECT=OS:CCLNG-PC5188\publicmsmq";
+        // readonly string publicQueuePath = "FormatName:DIRECT=OS:CCLNG-PC5188.svr.cyphercrescent.com\\publicmsmq";
         //readonly string privatequeuePath = @".\private$\MSMQ_MessagingApp";
-
+        readonly string publicQueuePath = @"CCLNG-PC5188\publicmsmq";
+       
         public void CreateQueue()
         {
             if (!MessageQueue.Exists(publicQueuePath))
@@ -57,6 +57,7 @@ namespace MSMQ_Publisher_Process.ViewModel
         /// </summary>
         public void SendDataToQueue()
         {
+            //MessageQueue queue = new($"FormatName:MULTICAST={multicastAddress}");
             MessageQueue queue = new(publicQueuePath);
             WellDataModel wellData = MapWellDataProperties();
             queue.Send(wellData, "CypherCrescentResource");
