@@ -3,11 +3,6 @@ using MSMQ_Publisher_Process.Model;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MSMQ_Publisher_Process.ViewModel
 {
@@ -19,8 +14,11 @@ namespace MSMQ_Publisher_Process.ViewModel
     { 
         public WellDataViewModel()
         {
+            machineName = Environment.MachineName;
             SendWellDataCommand = new DelegateCommand(SendWellDataCommandAction);
         }
+        private readonly string machineName;
+        readonly string queuePublicPath = @"\publicmsmq";
         public DelegateCommand SendWellDataCommand { get; set; }
         /// <summary>
         /// This method calls the CreateQueue and SendDataToQueue methods to send well data  
@@ -30,26 +28,18 @@ namespace MSMQ_Publisher_Process.ViewModel
             CreateQueue();
             SendDataToQueue();
         }
-
         /// <summary>
         /// This method specifies queuePath and creates a queue if one does nor exist
         /// </summary>
-
-
-        //int port =1801;
-        //string multicastAddress = "234.1.1.1:8001";
-
-        //readonly string publicQueuePath =@"FormatName:DIRECT=TCP:CCLNG-PC511\publicmsmq";
-        //string publicQueuePath = @"FormatName:DIRECT=OS:CCLNG-PC5188\publicmsmq";
         // readonly string publicQueuePath = "FormatName:DIRECT=OS:CCLNG-PC5188.svr.cyphercrescent.com\\publicmsmq";
         //readonly string privatequeuePath = @".\private$\MSMQ_MessagingApp";
-        readonly string publicQueuePath = @"CCLNG-PC5188\publicmsmq";
-       
+        //readonly string publicQueuePath = @"CCLNG-PC5188\publicmsmq";
+        private string GetMachinePublicQueuePath() => $"{machineName}{queuePublicPath}";
         public void CreateQueue()
         {
-            if (!MessageQueue.Exists(publicQueuePath))
+            if (!MessageQueue.Exists(GetMachinePublicQueuePath()))
             {
-                MessageQueue.Create(publicQueuePath);
+                MessageQueue.Create(GetMachinePublicQueuePath());
             }
         }
         /// <summary>
@@ -57,8 +47,7 @@ namespace MSMQ_Publisher_Process.ViewModel
         /// </summary>
         public void SendDataToQueue()
         {
-            //MessageQueue queue = new($"FormatName:MULTICAST={multicastAddress}");
-            MessageQueue queue = new(publicQueuePath);
+            MessageQueue queue = new(GetMachinePublicQueuePath());
             WellDataModel wellData = MapWellDataProperties();
             queue.Send(wellData, "CypherCrescentResource");
             FieldName = string.Empty;
