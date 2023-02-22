@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Management.Automation;
-//using System.Management.Automation;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows;
 
 namespace MSMQ_Publisher_Process
@@ -18,21 +12,39 @@ namespace MSMQ_Publisher_Process
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            //PowerShell powerShell = PowerShell.Create();
-            //powerShell.AddScript(@"
-            //# Check if MSMQ is installed
-            //if ((Get-WindowsFeature MSMQ).Installed -ne $true) {
-            //    # Install MSMQ
-            //    Install-WindowsFeature MSMQ -IncludeManagementTools
+            ActivateMsmq();
+        }
+        private static void ActivateMsmq()
+        {
+            // Path to the PowerShell script file
+            string scriptFilePath = @".\automate_publicmsmq.ps1";
+            
+            // Create the PowerShell process start info
+            ProcessStartInfo startInfo = new ProcessStartInfo()
+            {
+                FileName = "powershell.exe",
+                Arguments = $"-ExecutionPolicy Bypass -File \"{scriptFilePath}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
 
-            //    # Enable MSMQ
-            //    Enable-WindowsOptionalFeature -FeatureName MSMQ-Server -All
-            //    Enable-WindowsOptionalFeature -FeatureName MSMQ-Container -All
-            //}
-            //# Restart the MSMQ service
-            //Restart-Service MSMQ
-            //");
-            //powerShell.Invoke();
+            // Start the PowerShell process
+            using (Process process = new Process())
+            {
+                process.StartInfo = startInfo;
+                process.Start();
+
+                // Read the output and error streams
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                // Display the output and error
+                Console.WriteLine(output);
+                Console.WriteLine(error);
+            }
         }
     }
 }

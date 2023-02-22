@@ -3,6 +3,7 @@ using MSMQ_Publisher_Process.Model;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
+using System.Windows;
 
 namespace MSMQ_Publisher_Process.ViewModel
 {
@@ -32,14 +33,36 @@ namespace MSMQ_Publisher_Process.ViewModel
         /// <summary>
         /// This method specifies queuePath and creates a queue if one does nor exist
         /// </summary>
-        //readonly string publicQueuePath = "FormatName:DIRECT=OS:CCLNG-PC5188.svr.cyphercrescent.com\\publicmsmq";
-        //readonly string privatequeuePath = @".\private$\MSMQ_MessagingApp";
+        
+        readonly string privatequeuePath = @".\private$\MSMQ_MessagingApp";
         //readonly string publicQueuePath = @"CCLNG-PC5188\publicmsmq";
         public void CreateQueue()
         {
-            if (!MessageQueue.Exists(GetMachinePublicQueuePath()))
+            try
             {
-                MessageQueue.Create(GetMachinePublicQueuePath());
+                //string queuePath = MessageQueue.Exists(GetMachinePublicQueuePath()) ? GetMachinePublicQueuePath() : privatequeuePath;
+                //if (!MessageQueue.Exists(queuePath))
+                //{
+                //    MessageQueue.Create(queuePath);
+                //}
+                if (MessageQueue.Exists(GetMachinePublicQueuePath()))
+                {
+                    if (!MessageQueue.Exists(GetMachinePublicQueuePath()))
+                    {
+                        MessageQueue.Create(GetMachinePublicQueuePath());
+                    }
+                }
+                else
+                {
+                    if (!MessageQueue.Exists(privatequeuePath))
+                    {
+                        MessageQueue.Create(privatequeuePath);
+                    }
+                }
+            }
+            catch (MessageQueueException ex)
+            {
+                MessageBox.Show("An error occured while creating the queue:" + ex.Message);
             }
         }
         /// <summary>
@@ -47,13 +70,32 @@ namespace MSMQ_Publisher_Process.ViewModel
         /// </summary>
         public void SendDataToQueue()
         {
-            string publicQueuePath = GetMachinePublicQueuePath();
-            MessageQueue queue = new(publicQueuePath);
-            WellDataModel wellData = MapWellDataProperties();
-            queue.Send(wellData, "CypherCrescentResource");
-            FieldName = string.Empty;
-            WellName = string.Empty;
-            DrainagePoint = string.Empty;
+            try
+            {
+                if (MessageQueue.Exists(GetMachinePublicQueuePath()))
+                {
+                    string publicQueuePath = GetMachinePublicQueuePath();
+                    MessageQueue queue = new(publicQueuePath);
+                    WellDataModel wellData = MapWellDataProperties();
+                    queue.Send(wellData, "CypherCrescentResource");
+                    FieldName = string.Empty;
+                    WellName = string.Empty;
+                    DrainagePoint = string.Empty;
+                }
+                else
+                {
+                    MessageQueue queue = new(privatequeuePath);
+                    WellDataModel wellData = MapWellDataProperties();
+                    queue.Send(wellData, "CypherCrescentResource");
+                    FieldName = string.Empty;
+                    WellName = string.Empty;
+                    DrainagePoint = string.Empty;
+                }
+            }
+            catch (MessageQueueException ex)
+            {
+                MessageBox.Show("An error occured while sending data to the queue:" + ex.Message);
+            }
         }
         private WellDataModel MapWellDataProperties()
         {
