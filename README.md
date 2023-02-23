@@ -15,7 +15,7 @@ This Application reads the machine name, runs a PowerShell Script to activate MS
 # How to Run the Project: 
 * Clone the Project along side with Subscriber App https://github.com/Samuel-Jaja/MSMQ_Subscriber_Process
 * Run with Visual Studio 2022. 
-* The executable file (.exe) will be published soon for you to download.
+* The executable file (.exe) will be published soon for you to download(Also download for Subscriber from same link above).
 
 
 # Badges
