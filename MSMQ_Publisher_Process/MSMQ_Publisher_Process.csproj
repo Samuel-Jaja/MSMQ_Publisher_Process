@@ -13,12 +13,4 @@
     <PackageReference Include="Prism.Core" Version="8.1.97" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EditorConfigFiles Remove="C:\Users\kazor\OneDrive\Desktop\SEPAL 2.x.x\SEPAL 2.x.x Sprint 4\MSMQ_Publisher_Process\MSMQ_Publisher_Process\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="C:\Users\kazor\OneDrive\Desktop\SEPAL 2.x.x\SEPAL 2.x.x Sprint 4\MSMQ_Publisher_Process\MSMQ_Publisher_Process\.editorconfig" />
-  </ItemGroup>
-
 </Project>

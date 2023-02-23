@@ -3,6 +3,7 @@ using MSMQ_Publisher_Process.Model;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
+using System.Configuration;
 using System.Windows;
 
 namespace MSMQ_Publisher_Process.ViewModel
@@ -18,9 +19,12 @@ namespace MSMQ_Publisher_Process.ViewModel
             machineName = Environment.MachineName;
             SendWellDataCommand = new DelegateCommand(SendWellDataCommandAction);
         }
-        private readonly string machineName;
-        readonly string queuePath = @"\publicmsmq";
         public DelegateCommand SendWellDataCommand { get; set; }
+        private readonly string machineName;
+        readonly string publicQueuePath = ConfigurationManager.AppSettings["PublicQueuePath"] ?? "default value";
+        readonly string privateQueuePath = ConfigurationManager.AppSettings["PrivateQueuePath"] ?? "default value";
+        private string GetMachinePublicQueuePath() => $"{machineName}{publicQueuePath}";
+       
         /// <summary>
         /// This method calls the CreateQueue and SendDataToQueue methods to send well data  
         /// </summary>
@@ -29,35 +33,17 @@ namespace MSMQ_Publisher_Process.ViewModel
             CreateQueue();
             SendDataToQueue();
         }
-        private string GetMachinePublicQueuePath() => $"{machineName}{queuePath}";
         /// <summary>
-        /// This method specifies queuePath and creates a queue if one does nor exist
+        /// This method creates a queue if one does nor exist depending on the decision of the tenery operator using the genericQueuePath
         /// </summary>
-        
-        readonly string privatequeuePath = @".\private$\MSMQ_MessagingApp";
-        //readonly string publicQueuePath = @"CCLNG-PC5188\publicmsmq";
         public void CreateQueue()
         {
             try
             {
-                //string queuePath = MessageQueue.Exists(GetMachinePublicQueuePath()) ? GetMachinePublicQueuePath() : privatequeuePath;
-                //if (!MessageQueue.Exists(queuePath))
-                //{
-                //    MessageQueue.Create(queuePath);
-                //}
-                if (MessageQueue.Exists(GetMachinePublicQueuePath()))
+                string genericQueuePath = (MessageQueue.Exists(GetMachinePublicQueuePath())) ? GetMachinePublicQueuePath() : privateQueuePath;
+                if (!MessageQueue.Exists(genericQueuePath))
                 {
-                    if (!MessageQueue.Exists(GetMachinePublicQueuePath()))
-                    {
-                        MessageQueue.Create(GetMachinePublicQueuePath());
-                    }
-                }
-                else
-                {
-                    if (!MessageQueue.Exists(privatequeuePath))
-                    {
-                        MessageQueue.Create(privatequeuePath);
-                    }
+                    MessageQueue.Create(genericQueuePath);
                 }
             }
             catch (MessageQueueException ex)
@@ -66,7 +52,7 @@ namespace MSMQ_Publisher_Process.ViewModel
             }
         }
         /// <summary>
-        /// This method connects to queue and sends data( well data) to the queue created  
+        /// This method connects to queue and sends data( well data) to the queue created depending on if the machine uses a public or private queue 
         /// </summary>
         public void SendDataToQueue()
         {
@@ -84,7 +70,7 @@ namespace MSMQ_Publisher_Process.ViewModel
                 }
                 else
                 {
-                    MessageQueue queue = new(privatequeuePath);
+                    MessageQueue queue = new(privateQueuePath);
                     WellDataModel wellData = MapWellDataProperties();
                     queue.Send(wellData, "CypherCrescentResource");
                     FieldName = string.Empty;
