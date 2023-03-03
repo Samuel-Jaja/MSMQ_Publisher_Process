@@ -3,10 +3,10 @@ name: "Deploy MSMQ Publisher Process"
 on:
    push:
       tags:
-        - "msmq-publisher/v*"
+        - "pubprocess/v*"
 
 env: 
-   PROJECT_PATH: MSMQ_Publisher_Process\MSMQ_Publisher_Process.csproj
+   PROJECT_PATH: MSMQ_Publisher_Process.csproj
 
 jobs:
    deploy:
@@ -32,7 +32,7 @@ jobs:
                 tag_name: ${{ github.ref}}
                 release_name: ${{ github.ref}}
 
-           - uses: actions/upload-artifact
+           - uses: actions/upload-artifact@v2
              with: 
                 github-token: ${{ secrets.GITHUB_TOKEN}}
                 pattern: MSMQ_Publisher_Process\bin\Release\net6.0-windows\win-x64\publish\*.exe
