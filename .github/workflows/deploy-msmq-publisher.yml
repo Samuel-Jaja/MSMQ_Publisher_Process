@@ -1,43 +1,56 @@
-name: "Deploy MSMQ Publisher Process"
+name: "MSMQ App build and release workflow"
 
 on:
-   push:
-      tags:
-        - "pubprocess/v*"
+  push:
+    tags:
+      - "MSMQ-PubProcess/v*"
+  pull_request:
+    tags:
+      - "MSMQ-PubProcess/v*"
 
-env: 
-   PROJECT_PATH: MSMQ_Publisher_Process.csproj
+env:
+  PROJECT-PATH: MSMQ_Publisher_Process/MSMQ_Publisher_Process.csproj
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-   deploy:
-        runs-on: windows-latest
-        steps:
-           - uses: actions/checkout@v2
-           
-           - uses: actions/setup-dotnet@v1
-             with:
-                dotnet-version: 6.0.x
+  deploy:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Install .Net core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0.x'
 
-           - run: dotnet restore ${{ env.PROJECT_PATH }}
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
 
-           - run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore
+    - name: Build
+      run:  dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore  -p:PublishSingleFile=true
 
-           - run: dotnet publish ${{ env.PROJECT_PATH }} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true --no-build
+    - name: Run tests
+      run: dotnet test --no-restore --verbosity normal
 
-           - uses: actions/create-release@v1
-             id: create_release
-             env: 
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
-             with:
-                tag_name: ${{ github.ref}}
-                release_name: ${{ github.ref}}
+    - name: Publish 
+      run: dotnet publish ${{ env.PROJECT_PATH }} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
-           - uses: actions/upload-artifact@v2
-             with: 
-                github-token: ${{ secrets.GITHUB_TOKEN}}
-                pattern: MSMQ_Publisher_Process\bin\Release\net6.0-windows\win-x64\publish\*.exe
-                release-url: ${{ steps.create_release.outputs.upload_url}}
-   
+    - name: Create a Release
+      uses: actions/create-release@v1
+      id: create_release
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
 
-
-   
+    - name: Upload to release
+      uses: csexton/release-asset-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        pattern: MSMQ_Publisher_Process/bin/Release/net6.0-windows/*.exe
+        release-url: ${{ steps.create_release.outputs.upload_url }}
